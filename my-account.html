@@ -136,17 +136,23 @@
 
 				<h3 class="margin-bottom-10 margin-top-10">Login</h3>
 					<p class="form-row form-row-wide">
-						<label for="username">Username or Email Address:</label>
+						<label for="username">Email Address:</label>
 						<input type="text" class="input-text" name="username" id="username" value="" />
+						<div id="error-usernameDiv" class="hide">
+							<span style="color:red" id="error-username"></span>
+						</div>
 					</p>
 
 					<p class="form-row form-row-wide">
 						<label for="password">Password:</label>
 						<input class="input-text" type="password" name="password" id="password" />
+						<div id="error-passwordDiv" class="hide">
+							<span style="color:red" id="error-password"></span>
+						</div>
 					</p>
 
 					<p class="form-row">
-						<input type="submit" class="button" name="login" value="Login" />
+						<input id="login" type="submit" class="button" name="login" value="Login" />
 
 						<label for="rememberme" class="rememberme">
 						<input name="rememberme" type="checkbox" id="rememberme" value="forever" /> Remember Me</label>
@@ -182,8 +188,29 @@
 								<span style="color:red" id="error-regPassword2"></span>
 							</div>
 						</p>
+						<p class="form-row form-row-wide">
+							<label for="reg_name">Name</label>
+							<input type="password" class="input-text" name="password" id="reg_name" />
+						<div id="error-reg_nameDiv" class="hide">
+							<span style="color:red" id="error-reg_name"></span>
+						</div>
+						</p>
+						<p class="form-row form-row-wide">
+							<label for="reg_contact">Repeat Password:</label>
+							<input type="password" class="input-text" name="password" id="reg_contact" />
+						<div id="error-reg_contactDiv" class="hide">
+							<span style="color:red" id="error-reg_contact"></span>
+						</div>
+						</p>
+						<p class="form-row form-row-wide">
+							<label for="reg_address">Repeat Password:</label>
+							<input type="password" class="input-text" name="password" id="reg_address" />
+						<div id="error-reg_addressDiv" class="hide">
+							<span style="color:red" id="error-reg_address"></span>
+						</div>
+						</p>
 						<p class="form-row">
-							<input id="register" type="submit" class="button" name="register" value="Register" />
+							<button id="register" type="submit" class="button" name="register" value="Register" />
 						</p>
 
 				</div>
@@ -286,58 +313,121 @@
 <script src="scripts/jquery.jpanelmenu.js"></script>
 <script src="scripts/stacktable.js"></script>
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 </body>
 </html>
 <script>
-$( document ).ready(function() {
-	const registerBtn = document.getElementById("register");
+$(document).ready(function() {
+	var registerBtn = document.getElementById("register");
+	var loginBtn = document.getElementById("login");
     registerBtn.addEventListener("click", function() {
-
-    	var email = document.getElementById('reg_email').value;
-    	var password = document.getElementById('reg_password').value;
+    	console.log("In Register btn");
   		var isValid = validateRegister();
   		if(isValid){
-			const API_URL = "Enter API URL here";
-			// Define the properties and message for the API request
-			const requestOptions = {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					//"Authorization": `Bearer ${API_KEY}`
-				},
-				body: JSON.stringify({
-					email: email,
-					password: password
-				})
-			}
-			// Send POST request to API, get response and set the reponse as paragraph text
-			fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
-				var result = data
-				$.cookie("jwtToken", data.jwtToken);
-			}).catch(() => {
-			})
-		});
-	}
+			createAccount();
+		}
+	});
+	loginBtn.addEventListener("click", function() {
+		console.log("In login btn");
+  		var isValid = validateLogin();
+  		console.log("is valid : " + isValid);
+  		if(isValid){
+			login();
+		}
+	});
+
 });
+
+function createAccount(){
+	var email = document.getElementById('reg_email').value;
+    var password = document.getElementById('reg_password').value;
+    var name = document.getElementById('reg_password').value;
+    var address = document.getElementById('reg_password').value;
+    var contactNo = document.getElementById('reg_password').value;
+	const API_URL = "https://o6ebr1rirc.execute-api.ap-southeast-1.amazonaws.com/Prod/user/create";
+	// Define the properties and message for the API request
+	const requestOptions = {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			email: email,
+			password: password,
+			name: name,
+			contactNo : contactNo,
+			address : address
+		})
+	}
+	// Send POST request to API, get response and set the reponse as paragraph text
+	fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
+		var result = data
+		$.cookie("jwtToken", data.jwtToken);
+		alert("Registration Successfully. Please login to your account.");
+	}).catch(() => {
+	})
+}
+
+function login(){
+	var email = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+	const API_URL = "https://o6ebr1rirc.execute-api.ap-southeast-1.amazonaws.com/Prod/user/login";
+	// Define the properties and message for the API request
+	const requestOptions = {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			email: email,
+			password: password
+		})
+	}
+	// Send POST request to API, get response and set the reponse as paragraph text
+	fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
+		var result = data
+		console.log("Result : " + result );
+		$.cookie("jwtToken", data.jwtToken);
+		alert("Login Successfully.");
+	}).catch(() => {
+	})
+}
+
 
 function validateRegister(){
 	var email = document.getElementById('reg_email').value;
     var password = document.getElementById('reg_password').value;
     var password2 = document.getElementById('reg_password2').value;
     if(typeof email === "string" && email.length === 0){
-		document.getElementById("regEmailDiv").classList.remove("hide");
+		document.getElementById("error-regEmailDiv").classList.remove("hide");
 		$("#error-regEmail").html("Email is Empty");
 		return false;
     }
     if(typeof password === "string" && password.length === 0){
-		document.getElementById("regPassword1Div").classList.remove("hide");
-		$("#error-regPassword1").html("Email is Empty");
+		document.getElementById("error-regPassword1Div").classList.remove("hide");
+		$("#error-regPassword1").html("Password is Empty");
 		return false;
     }
     if(typeof password2 === "string" && password2.length === 0){
-		document.getElementById("regPassword2Div").classList.remove("hide");
-		$("#error-regPassword2Div").html("Email is Empty");
+		document.getElementById("error-regPassword2Div").classList.remove("hide");
+		$("#error-regPassword2Div").html("Password is Empty");
+		return false;
+    }
+    return true;
+}
+
+function validateLogin(){
+	var email = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    if(typeof email === "string" && email.length === 0){
+		document.getElementById("error-usernameDiv").classList.remove("hide");
+		$("#error-username").html("Email is Empty");
+		return false;
+    }
+    if(typeof password === "string" && password.length === 0){
+		document.getElementById("error-passwordDiv").classList.remove("hide");
+		$("#error-password").html("Password is Empty");
 		return false;
     }
     return true;
