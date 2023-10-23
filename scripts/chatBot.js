@@ -3,10 +3,9 @@ const closeBtn = document.querySelector(".close-btn");
 const chatbox = document.querySelector(".chatbox");
 const chatInput = document.querySelector(".chat-input textarea");
 const sendChatBtn = document.querySelector(".chat-input span");
-
-let userMessage = null; // Variable to store user's message
-const API_KEY = "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"; // Paste your API key here
+let userMessage = null;
 const inputInitHeight = chatInput.scrollHeight;
+var generateResponse;
 const createChatLi = (message, className) => {
     // Create a chat <li> element with passed message and className
     const chatLi = document.createElement("li");
@@ -16,61 +15,71 @@ const createChatLi = (message, className) => {
     chatLi.querySelector("p").textContent = message;
     return chatLi; // return chat <li> element
 }
-
-
-const generateResponse = (chatElement) => {
-    const API_URL = "https://api.openai.com/v1/chat/completions";
-    const messageElement = chatElement.querySelector("p");
-
-    // Define the properties and message for the API request
-    const requestOptions = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{role: "user", content: userMessage}],
-        })
+function getApiKey(callback){
+$.ajax({
+    url:'/key/keys.txt',
+    success: function (data){
+     callback(data);
     }
-
-    // Send POST request to API, get response and set the reponse as paragraph text
-    fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
-        messageElement.textContent = data.choices[0].message.content.trim();
-    }).catch(() => {
-        messageElement.classList.add("error");
-        messageElement.textContent = "Oops! Something went wrong. Please try again.";
-    }).finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
+  });
 }
+function setupConst(apiKey,callback){
+            console.log(apiKey);
+            const API_KEY = apiKey;
+            console.log(API_KEY);
+             generateResponse = (chatElement) => {
+                const API_URL = "https://api.openai.com/v1/chat/completions";
+                const messageElement = chatElement.querySelector("p");
+                // Define the properties and message for the API request
+                const requestOptions = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{role: "user", content: userMessage}],
+                    })
+                }
 
-const onloadQuestion = (chatElement) => {
-    const messageElement = chatElement.querySelector("p");
-    const API_URL = "https://api.openai.com/v1/chat/completions";
-    startMessage = "I want you to act as an interviewer. I will be the candidate and you will ask me the interview questions for the position position. I want you to only reply as the interviewer. Do not write all the conservation at once. I want you to only do the interview with me. Ask me the questions and wait for my answers. Do not write explanations. Ask me the questions one by one like an interviewer does and wait for my answers. My first sentence is “Hi”"
-    const responseMessage = "";
-    // Define the properties and message for the API request
-    const requestOptions = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{role: "user", content: startMessage}],
-        })
-    }
-    chatbox.appendChild(chatElement);
-    // Send POST request to API, get response and set the reponse as paragraph text
-    fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
-         messageElement.textContent = data.choices[0].message.content.trim();
-    }).catch(() => {
-        messageElement.classList.add("error");
-        messageElement.textContent = "Oops! Something went wrong. Please try again.";
-    }).finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
+                // Send POST request to API, get response and set the reponse as paragraph text
+                fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
+                    messageElement.textContent = data.choices[0].message.content.trim();
+                }).catch(() => {
+                    messageElement.classList.add("error");
+                    messageElement.textContent = "Oops! Something went wrong. Please try again.";
+                }).finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
+            }
+        const onloadQuestion = (chatElement) => {
+            const messageElement = chatElement.querySelector("p");
+            const API_URL = "https://api.openai.com/v1/chat/completions";
+            startMessage = "I want you to act as an interviewer. I will be the candidate and you will ask me the interview questions for the position position. I want you to only reply as the interviewer. Do not write all the conservation at once. I want you to only do the interview with me. Ask me the questions and wait for my answers. Do not write explanations. Ask me the questions one by one like an interviewer does and wait for my answers. My first sentence is “Hi”"
+            const responseMessage = "";
+            // Define the properties and message for the API request
+            const requestOptions = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{role: "user", content: startMessage}],
+                })
+            }
+            chatbox.appendChild(chatElement);
+            // Send POST request to API, get response and set the reponse as paragraph text
+            fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
+                 messageElement.textContent = data.choices[0].message.content.trim();
+            }).catch(() => {
+                messageElement.classList.add("error");
+                messageElement.textContent = "Oops! Something went wrong. Please try again.";
+            }).finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
+        }
+        var incomingChatLi = createChatLi("Lets begin our Interview Stimulator", "incoming");
+        onloadQuestion(incomingChatLi);
 }
-
 const handleChat = () => {
     userMessage = chatInput.value.trim(); // Get user entered message and remove extra whitespace
     if(!userMessage) return;
@@ -110,7 +119,5 @@ sendChatBtn.addEventListener("click", handleChat);
 closeBtn.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
 
 $(document).ready(function() {
-    var incomingChatLi = createChatLi("Lets begin our Interview Stimulator", "incoming");
-    onloadQuestion(incomingChatLi);
-
+    getApiKey(setupConst);
 });

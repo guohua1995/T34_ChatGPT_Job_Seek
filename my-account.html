@@ -58,11 +58,10 @@
 
 				<li><a href="#">For Candidates</a>
 					<ul>
-						<li><a href="browse-jobs.html">Browse Jobs</a></li>
 						<li><a href="browse-categories.html">Browse Categories</a></li>
-						<li><a href="add-resume.html">Add Resume</a></li>
-						<li><a href="manage-resumes.html">Manage Resumes</a></li>
-						<li><a href="job-alerts.html">Job Alerts</a></li>
+						<li><a href="add-resume.html">Edit Profile</a></li>
+						<li><a href="manage-resumes.html"></a>Resume Recommendation Engine</li>
+						<li><a href="mock-interview.html">Job Interview Stimulator</a></li>
 					</ul>
 				</li>
 
@@ -79,7 +78,7 @@
 			</ul>
 
 
-			<ul class="responsive float-right">
+			<ul class="float-right">
 				<li><a href="my-account.html#tab2"><i class="fa fa-user"></i> Sign Up</a></li>
 				<li><a href="my-account.html"><i class="fa fa-lock"></i> Log In</a></li>
 			</ul>
@@ -190,27 +189,13 @@
 						</p>
 						<p class="form-row form-row-wide">
 							<label for="reg_name">Name</label>
-							<input type="password" class="input-text" name="password" id="reg_name" />
+							<input type="text" class="input-text" name="password" id="reg_name" />
 						<div id="error-reg_nameDiv" class="hide">
 							<span style="color:red" id="error-reg_name"></span>
 						</div>
 						</p>
-						<p class="form-row form-row-wide">
-							<label for="reg_contact">Repeat Password:</label>
-							<input type="password" class="input-text" name="password" id="reg_contact" />
-						<div id="error-reg_contactDiv" class="hide">
-							<span style="color:red" id="error-reg_contact"></span>
-						</div>
-						</p>
-						<p class="form-row form-row-wide">
-							<label for="reg_address">Repeat Password:</label>
-							<input type="password" class="input-text" name="password" id="reg_address" />
-						<div id="error-reg_addressDiv" class="hide">
-							<span style="color:red" id="error-reg_address"></span>
-						</div>
-						</p>
 						<p class="form-row">
-							<button id="register" type="submit" class="button" name="register" value="Register" />
+							<input id="register" type="submit" class="button" name="register" value="Register" />
 						</p>
 
 				</div>
@@ -312,8 +297,7 @@
 <script src="scripts/jquery.counterup.min.js"></script>
 <script src="scripts/jquery.jpanelmenu.js"></script>
 <script src="scripts/stacktable.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="scripts/cookie.min.js"></script>
 
 </body>
 </html>
@@ -336,15 +320,16 @@ $(document).ready(function() {
 			login();
 		}
 	});
-
+	const jwtToken = cookie.get('jwtToken');
+	if(typeof jwtToken === "string" && jwtToken.length != 0){
+      	getProfile(jwtToken);
+	}
 });
 
 function createAccount(){
 	var email = document.getElementById('reg_email').value;
     var password = document.getElementById('reg_password').value;
-    var name = document.getElementById('reg_password').value;
-    var address = document.getElementById('reg_password').value;
-    var contactNo = document.getElementById('reg_password').value;
+    var name = document.getElementById('reg_name').value;
 	const API_URL = "https://o6ebr1rirc.execute-api.ap-southeast-1.amazonaws.com/Prod/user/create";
 	// Define the properties and message for the API request
 	const requestOptions = {
@@ -356,18 +341,43 @@ function createAccount(){
 			email: email,
 			password: password,
 			name: name,
-			contactNo : contactNo,
-			address : address
 		})
 	}
 	// Send POST request to API, get response and set the reponse as paragraph text
 	fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
-		var result = data
-		$.cookie("jwtToken", data.jwtToken);
+		var result = data;
 		alert("Registration Successfully. Please login to your account.");
 	}).catch(() => {
 	})
 }
+
+
+
+function getProfile(jwtToken){
+	const API_URL = "https://o6ebr1rirc.execute-api.ap-southeast-1.amazonaws.com/Prod/user/view";
+		// Define the properties and message for the API request
+		const requestOptions = {
+			method: "POST",
+			headers: {
+				"Auth": jwtToken
+			}
+		}
+		// Send POST request to API, get response and set the reponse as paragraph text
+		fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
+			var result = data
+			var name = data.name;
+			var topSignin = document.getElementById("top-signup");
+			var topLogin = document.getElementById("top-login");
+			var topProfileName = document.getElementById("top-profileName");
+			var topProfileName1 = document.getElementById("top-profileName1");
+  			topSignin.classList.add("hide");
+  			topLogin.classList.add("hide");
+  			topProfileName.classList.remove("hide");
+
+		}).catch(() => {
+		})
+}
+
 
 function login(){
 	var email = document.getElementById('username').value;
@@ -377,7 +387,7 @@ function login(){
 	const requestOptions = {
 		method: "POST",
 		headers: {
-			"Content-Type": "application/json", 
+			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
 			email: email,
@@ -388,12 +398,13 @@ function login(){
 	fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
 		var result = data
 		console.log("Result : " + result );
-		$.cookie("jwtToken", data.jwtToken);
+		cookie.set({
+ 			jwtToken: data.jwtToken
+		});
 		alert("Login Successfully.");
 	}).catch(() => {
 	})
 }
-
 
 function validateRegister(){
 	var email = document.getElementById('reg_email').value;
