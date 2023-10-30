@@ -75,13 +75,21 @@
 				</li>
 
 				<li><a href="blog.html">Blog</a></li>
+
+				<li id ="profile" class ="hide float-right"><a href="#"><i class="fa fa-user"></i> Profile</a>
+					<ul>
+						<li id ="name" style="color: white;"></li>
+					</ul>
+				</li>
 			</ul>
 
 
-			<ul class="float-right">
+			<ul id="postLogin" class="float-right">
 				<li><a href="my-account.html#tab2"><i class="fa fa-user"></i> Sign Up</a></li>
 				<li><a href="my-account.html"><i class="fa fa-lock"></i> Log In</a></li>
 			</ul>
+
+
 
 		</nav>
 
@@ -309,6 +317,7 @@ $(document).ready(function() {
     	console.log("In Register btn");
   		var isValid = validateRegister();
   		if(isValid){
+  			alert("Please wait while we register your account");
 			createAccount();
 		}
 	});
@@ -317,6 +326,7 @@ $(document).ready(function() {
   		var isValid = validateLogin();
   		console.log("is valid : " + isValid);
   		if(isValid){
+  			alert("Please wait while we login your account");
 			login();
 		}
 	});
@@ -347,6 +357,7 @@ function createAccount(){
 	fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
 		var result = data;
 		alert("Registration Successfully. Please login to your account.");
+		window.location.href = "add-resume.html";
 	}).catch(() => {
 	})
 }
@@ -365,14 +376,14 @@ function getProfile(jwtToken){
 		// Send POST request to API, get response and set the reponse as paragraph text
 		fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
 			var result = data
-			var name = data.name;
-			var topSignin = document.getElementById("top-signup");
-			var topLogin = document.getElementById("top-login");
-			var topProfileName = document.getElementById("top-profileName");
-			var topProfileName1 = document.getElementById("top-profileName1");
-  			topSignin.classList.add("hide");
-  			topLogin.classList.add("hide");
-  			topProfileName.classList.remove("hide");
+			var resultName = data.name;
+			var resultEmail = data.email;
+			var postLogin = document.getElementById("postLogin");
+			var profile = document.getElementById("profile");
+			var name = document.getElementById("name");
+  			postLogin.classList.add("hide");
+  			name.innerHTML = resultName;
+  			profile.classList.remove("hide");
 
 		}).catch(() => {
 		})

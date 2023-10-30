@@ -148,10 +148,10 @@
 			<div class="form">
 				<h5>Resume <span>(optional)</span></h5>
 				<label class="upload-btn">
-				    <input type="file" multiple />
+				    <input type="file" multiple name="filename"/>
 				    <i class="fa fa-upload"></i> Browse
 				</label>
-				<span class="fake-input">No file selected</span>
+				<span class="fake-input" id ="uploadPath">No file selected</span>
 			</div>
 
 			<input id="saveProfile" type="submit" class="button" name="register" value="Save Profile" />
@@ -276,6 +276,14 @@ const jwtToken = cookie.get('jwtToken');
       	getProfile(jwtToken,setInput);
 
 	}
+});
+
+$('input[type="file"]').change(function(){
+
+  var f = this.files[0];
+  var name = f.name;
+  $("#uploadPath").html(name);
+
 });
 
 function validateUpdateProfile(){
