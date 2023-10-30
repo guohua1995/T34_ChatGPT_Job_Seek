@@ -357,7 +357,6 @@ function createAccount(){
 	fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
 		var result = data;
 		alert("Registration Successfully. Please login to your account.");
-		window.location.href = "add-resume.html";
 	}).catch(() => {
 	})
 }
@@ -413,6 +412,7 @@ function login(){
  			jwtToken: data.jwtToken
 		});
 		alert("Login Successfully.");
+		window.location.href = "add-resume.html";
 	}).catch(() => {
 	})
 }
